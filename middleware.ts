@@ -4,7 +4,6 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 const isPublicRoute = createRouteMatcher([
   "/api/uploadthing",
   "/api/uploadthing/(.*)",  // More specific pattern
-  "/setup",
   "/sign-in(.*)",
   "/sign-up(.*)", 
   "/debug-upload",

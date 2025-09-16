@@ -3,6 +3,7 @@ import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/provider/theme-provider";
+import { ModelProvider } from "@/components/provider/model-provider";
 
 const openSans = Open_Sans({
   variable: "--font-open-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
               storageKey="discord-clone-theme"
             >
               <div className={`${openSans.variable} ${openSansMono.variable} antialiased h-full`}>
+                <ModelProvider />
                 {children}
               </div>
             </ThemeProvider>
