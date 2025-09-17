@@ -3,27 +3,29 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 
 interface InviteCodePageProps {
-    params: {
+    params: Promise<{
         inviteCode: string;
-    }
+    }>
 }
 
 const InviteCodePage = async ({
     params
 }: InviteCodePageProps) => {
+    const { inviteCode } = await params;
+    
     const profile = await currentProfile();
 
     if (!profile) {
         return redirect("/sign-in");
     }
 
-    if (!params.inviteCode) {
+    if (!inviteCode) {
         return redirect("/");
     }
 
     const existingServer = await db.server.findFirst({
         where: {
-            inviteCode: params.inviteCode,
+            inviteCode: inviteCode,
             members: {
                 some: {
                     profileId: profile.id
@@ -36,31 +38,31 @@ const InviteCodePage = async ({
         return redirect(`/servers/${existingServer.id}`);
     }
 
-    const server = await db.server.update({
-        where: {
-            inviteCode: params.inviteCode   
-        },
-        data: {
-            members:{
-                create: [
-                    {
-                        profileId: profile.id,
-                    }
-                ]
+    try {
+        const server = await db.server.update({
+            where: {
+                inviteCode: inviteCode   
+            },
+            data: {
+                members:{
+                    create: [
+                        {
+                            profileId: profile.id,
+                        }
+                    ]
+                }
             }
+        })
+
+        if (server){
+            return redirect(`/servers/${server.id}`);
         }
-    })
-
-    if (server){
-        return redirect(`/servers/${server.id}`);
+    } catch (error) {
+        console.error("Error joining server:", error);
+        return redirect("/");
     }
-    return null;
 
-    return ( 
-        <div>
-            Hello {params.inviteCode}
-        </div>
-     );
+    return redirect("/");
 }
 
 export default InviteCodePage;
