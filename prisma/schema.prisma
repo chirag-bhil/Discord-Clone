@@ -10,7 +10,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -18,8 +18,8 @@ model Profile {
   id String @id @default(uuid())
   userId String @unique
   name String
-  imageUrl String @db.Text
-  email String @db.Text
+  imageUrl String
+  email String
 
   servers Server[]
   members Member[]
@@ -33,7 +33,7 @@ model Profile {
 model Server {
   id String @id @default(uuid())
   name String
-  imageUrl String @db.Text
+  imageUrl String
   inviteCode String @unique
 
   profileId String
@@ -68,6 +68,10 @@ model Member {
   @@index([profileId])
   @@index([serverId])
   @@unique([profileId, serverId])
+  messages Message[]
+  conversationsIntiated Conversation[] @relation("MemberOne")
+  conversationsRecieved Conversation[] @relation("MemberTwo")
+  directMessages DirectMessage[]
 }
 
 enum ChannelType {
@@ -92,4 +96,64 @@ model Channel {
   updatedAt DateTime @updatedAt
   @@index([profileId])
   @@index([serverId])
+  messages Message[]
+}
+
+model Message {
+  id String @id @default(uuid())
+  content String
+
+  fileUrl String? 
+
+  memberId String
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  channelId String
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([channelId])
+  @@index([memberId])
+}
+
+model Conversation {
+  id String @id @default(uuid())
+  
+  memberOneId String
+  memberOne Member @relation("MemberOne", fields: [memberOneId], references: [id], onDelete: Cascade)
+
+  memberTwoId String
+  memberTwo Member @relation("MemberTwo", fields: [memberTwoId], references: [id], onDelete: Cascade)
+
+  @@index([memberOneId])
+  @@index([memberTwoId])
+
+  @@unique([memberOneId, memberTwoId])
+
+  directMessages DirectMessage[]
+}
+
+model DirectMessage {
+  id String @id @default(uuid())
+  content String
+
+  fileUrl String? 
+
+  memberId String
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conversationId])
+  @@index([memberId])
 }

@@ -1,11 +1,14 @@
 import { NavigationSidebar } from "@/components/navigation/navigation-sidebar";
+import { ReactNode } from "react";
 
-const ServersLayout = async ({
+interface ServersLayoutProps {
+    children: ReactNode;
+}
+
+export default async function ServersLayout({
     children
-}: {
-    children: React.ReactNode;
-}) => {
-    return ( 
+}: ServersLayoutProps) {
+    return (
         <div className="h-full">
             <div className="hidden md:flex h-full w-[72px] z-30 flex-col fixed inset-y-0">
                 <NavigationSidebar />
@@ -16,5 +19,3 @@ const ServersLayout = async ({
         </div>
     );
 }
- 
-export default ServersLayout;

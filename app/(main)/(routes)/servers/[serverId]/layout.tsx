@@ -2,19 +2,23 @@ import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { ServerSidebar } from "@/components/server/server-sidebar";
+import { ReactNode } from "react";
 
-const ServerIdLayout = async ({
+interface ServerIdLayoutProps {
+    children: ReactNode;
+    params: Promise<{ serverId: string }>;
+}
+
+export default async function ServerIdLayout({
     children,
     params,
-}: {
-    children: React.ReactNode;
-    params: Promise<{ serverId: string }>;
-}) => {
+}: ServerIdLayoutProps) {
     const { serverId } = await params;
     const profile = await currentProfile();
 
     if (!profile) {
-        return redirect('/sign-in');
+        redirect('/sign-in');
+        return null;
     }
 
     const server = await db.server.findUnique({
@@ -26,22 +30,21 @@ const ServerIdLayout = async ({
                 }
             }
         }
-    })
+    });
 
     if (!server) {
-        return redirect('/sign-in');
+        redirect('/sign-in');
+        return null;
     }
 
-    return (  
+    return (
         <div className="h-full">
             <div className="hidden md:flex h-full w-60 z-20 flex-col fixed inset-y-0 ml-[72px]">
                 <ServerSidebar serverId={serverId} />
             </div>
-            <main className="md:pl-60 h-full">
+            <main className="h-full md:pl-[312px]">
                 {children}
             </main>
         </div>
     );
 }
- 
-export default ServerIdLayout;
