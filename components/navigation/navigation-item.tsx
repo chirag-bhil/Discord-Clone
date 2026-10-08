@@ -49,6 +49,7 @@ export const NavigationItem = ({
                         alt="channel"
                         src={imageUrl}
                         fill
+                        unoptimized
                         className="object-cover"
                     />
                 </div>               

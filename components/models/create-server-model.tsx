@@ -73,12 +73,12 @@ const CreateServerModel = () => {
 
     return (
         <Dialog open={isModelOpen} onOpenChange={handleClose}>
-            <DialogContent className="bg-white text-black p-0 overflow-hidden max-w-sm">
+            <DialogContent className="p-0 overflow-hidden max-w-sm">
                 <DialogHeader className="pt-6 px-6">
                     <DialogTitle className="text-xl text-center font-bold">
                         Customize Your Server
                     </DialogTitle>
-                    <DialogDescription className="text-center text-zinc-500 text-sm">
+                    <DialogDescription className="text-center text-muted-foreground text-sm">
                         Give your server a personality with a name and an image.
                     </DialogDescription>
                 </DialogHeader>
@@ -108,13 +108,13 @@ const CreateServerModel = () => {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary-700">
+                                        <FormLabel className="uppercase text-xs font-bold text-muted-foreground">
                                             Server Name
                                         </FormLabel>
                                         <FormControl>
                                             <Input 
                                                 disabled={isLoading}
-                                                className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                                                className="bg-muted/60 border-0 focus-visible:ring-0 text-foreground focus-visible:ring-offset-0"
                                                 placeholder="Enter server name"
                                                 {...field}
                                             />
@@ -124,7 +124,7 @@ const CreateServerModel = () => {
                                 )}
                             />
                         </div>
-                        <DialogFooter className="bg-gray-100 px-6 py-4">
+                        <DialogFooter className="bg-muted px-6 py-4">
                             <Button variant="primary" disabled={isLoading}>
                                 Create
                             </Button>

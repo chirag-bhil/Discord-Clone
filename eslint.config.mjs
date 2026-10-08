@@ -18,6 +18,10 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "lib/generated/**",
+      "lib/generated-sqlite/**",
+      "lib/generated-mongo/**",
+      "scripts/**",
     ],
   },
 ];

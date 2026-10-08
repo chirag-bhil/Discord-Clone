@@ -1,6 +1,6 @@
 "use client";
 
-import { Channel as PrismaChannel, ChannelType, MemberRole, Server } from "@/lib/generated/prisma/wasm";
+import { Channel as PrismaChannel, ChannelType, MemberRole, Server } from "@/lib/generated/prisma";
 import { cn } from "@/lib/utils";
 import { Edit, Hash, Lock, Mic, Trash, Video } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -32,7 +32,7 @@ export const ServerChannel = ({
 
         const onAction = (e: React.MouseEvent, action: ModelType) => {
             e.stopPropagation();
-            onOpen(action, {server, channel: channel as any});
+            onOpen(action, {server, channel});
         }
 
         const Icon = iconMap[channel.type];

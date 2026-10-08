@@ -1,19 +1,7 @@
 import type { Metadata } from "next";
-import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/provider/theme-provider";
-import { ModelProvider } from "@/components/provider/model-provider";
-
-const openSans = Open_Sans({
-  variable: "--font-open-sans",
-  subsets: ["latin"],
-});
-
-const openSansMono = Open_Sans({
-  variable: "--font-open-sans-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Discord",
@@ -27,10 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-        <body className="cn(
-          font.className,
-          bg-white dark:bg-[#313338]
-        )">
+        <body className="min-h-screen bg-background font-sans text-foreground antialiased">
           <ClerkProvider>
             <ThemeProvider
               attribute="class"
@@ -38,8 +23,7 @@ export default function RootLayout({
               enableSystem={true}
               storageKey="discord-clone-theme"
             >
-              <div className={`${openSans.variable} ${openSansMono.variable} antialiased h-full`}>
-                <ModelProvider />
+              <div className="h-full">
                 {children}
               </div>
             </ThemeProvider>

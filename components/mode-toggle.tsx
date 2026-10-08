@@ -13,7 +13,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function ModeToggle() {
+  const [mounted, setMounted] = React.useState(false)
   const { setTheme } = useTheme()
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Radix generates ids for the dropdown trigger. Avoid rendering that
+  // browser-dependent tree during SSR so its ids cannot differ on hydration.
+  if (!mounted) {
+    return <div className="h-9 w-9" aria-hidden="true" />
+  }
 
   return (
     <DropdownMenu>

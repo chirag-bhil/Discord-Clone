@@ -1,13 +1,15 @@
-import { ChannelType, Server } from "@/lib/generated/prisma";
-import { Channel } from "diagnostics_channel";
+import { Channel, ChannelType, Server } from "@/lib/generated/prisma";
 import { create } from "zustand";
+import { QueryParams } from "@/types";
 
-export type ModelType = "createServer" | "invite" | "editServer" | "members" | "createChannel" | "leaveServer" | "deleteServer"| "deleteChannel" | "editChannel";
+export type ModelType = "createServer" | "invite" | "editServer" | "members" | "createChannel" | "leaveServer" | "deleteServer"| "deleteChannel" | "editChannel" | "messageFile" | "deleteMessage" | "roles";
 
 interface ModelData {
     server?: Server;
     channel?: Channel;
     channelType?: ChannelType;
+    apiUrl?: string;
+    query?: QueryParams;
 }
 
 interface ModelStore {

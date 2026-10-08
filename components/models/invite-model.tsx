@@ -53,7 +53,7 @@ const InviteModel = () => {
 
     return (
         <Dialog open={isModelOpen} onOpenChange={onClose}>
-            <DialogContent className="bg-white text-black p-0 overflow-hidden max-w-sm">
+            <DialogContent className="p-0 overflow-hidden max-w-sm">
                 <DialogHeader className="pt-6 px-6">
                    <DialogTitle className="text-xl text-center font-bold">
                        Invite Friends
@@ -62,7 +62,7 @@ const InviteModel = () => {
                 </DialogHeader> 
                 <div className="p-6">
                     <Label
-                        className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70"
+                        className="uppercase text-xs font-bold text-muted-foreground"
                     >
                         Server Invite Link
                     </Label>
@@ -70,7 +70,7 @@ const InviteModel = () => {
                         <Input 
                             disabled={isLoading}
                             style={{ backgroundColor: 'rgba(212, 212, 216, 0.5)', border: 'none' }}
-                            className="focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                            className="focus-visible:ring-0 text-foreground focus-visible:ring-offset-0"
                             value={inviteUrl}
                         />
                         <Button disabled={isLoading}  onClick={onCopy} size="icon">
@@ -82,7 +82,7 @@ const InviteModel = () => {
                         disabled={isLoading}
                         variant="link"
                         size="sm"
-                        className="text-xs text-zinc-500 mt-4"
+                        className="text-xs text-muted-foreground mt-4"
                     >
                         Generate A New Link
                         <RefreshCcw className="w-4 h-4 ml-2" />

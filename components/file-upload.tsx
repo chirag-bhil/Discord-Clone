@@ -1,8 +1,8 @@
 "use client";
 
-import { X } from "lucide-react";
+import { FileIcon, X } from "lucide-react";
 import Image from "next/image";
-import { UploadButton, UploadDropzone } from "@/lib/uploadthing";
+import { UploadDropzone } from "@/lib/uploadthing";
 
 interface FileUploadProps {
   onChange: (url?: string) => void;
@@ -25,6 +25,7 @@ export const FileUpload = ({
           fill
           alt="Upload"
           src={value}
+          unoptimized
           className="rounded-full"
         />
         <button
@@ -64,24 +65,6 @@ export const FileUpload = ({
     }
   };
 
-  // Enhanced success handler function
-  const handleUploadSuccess = (res: any, componentName: string) => {
-    console.log(`✅ ${componentName} Success:`, res);
-    console.log("Upload response details:", {
-      fileCount: res?.length,
-      firstFile: res?.[0],
-      url: res?.[0]?.url
-    });
-    
-    if (res && res[0] && res[0].url) {
-      onChange(res[0].url);
-      alert(`${componentName} Success! File uploaded successfully.`);
-    } else {
-      console.error("No URL in response:", res);
-      alert("Upload completed but no file URL received.");
-    }
-  };
-
   // Enhanced upload begin handler
   const handleUploadBegin = (name: string, componentName: string) => {
     console.log(`🚀 ${componentName} Started:`, name);
@@ -96,6 +79,32 @@ export const FileUpload = ({
     console.log(`Starting upload: ${name}`);
   };
 
+  if (value && fileType === 'pdf'){
+    return(
+      <div className="relative flex items-center p-2 mt-2 rounded-md bg-background/10">
+        
+        <FileIcon 
+          className="h-10 w-10 fill-indigo-200 stroke-indigo-400 "
+        />
+        <a 
+          href={value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-2 text-sm text-indigo-500 dark:text-indigo-400 hover:underline"
+        >
+          {value}
+
+        </a>
+        <button
+          onClick={() => onChange(undefined)}
+          className="bg-rose-500 text-white p-1 rounded-full absolute -top-2 -right-2 shadow-sm"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+      </div>
+    )
+  }
   
 
   return (
@@ -116,12 +125,13 @@ export const FileUpload = ({
             container: {
               width: "200px",
               height: "200px",
-              border: "2px dashed #e2e8f0",
+              border: "2px dashed var(--border)",
               borderRadius: "8px",
-              background: "#f8fafc",
+              background: "var(--muted)",
+              color: "var(--foreground)",
             },
             uploadIcon: {
-              color: "#64748b",
+              color: "var(--muted-foreground)",
               width: "40px",
               height: "40px",
             },
@@ -138,8 +148,8 @@ export const FileUpload = ({
               margin: "0px",
             },
             button: {
-              background: "hsl(var(--primary))",
-              color: "hsl(var(--primary-foreground))",
+              background: "var(--primary)",
+              color: "var(--primary-foreground)",
               fontSize: "14px",
               borderRadius: "6px",
               padding: "8px 16px",

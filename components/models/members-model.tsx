@@ -25,7 +25,7 @@ import {
     DropdownMenuSubContent,
     DropdownMenuSub
 }from "@/components/ui/dropdown-menu"
-import { MemberRole } from "@/lib/generated/prisma";
+import { MemberRole, Role } from "@/lib/generated/prisma";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { set } from "zod";
@@ -42,9 +42,26 @@ const MembersModel = () => {
     const { onOpen, isOpen, onClose, model, data } = useModel();
     const [loadingId, setLoadingId] = useState("");
     const [isMounted, setIsMounted] = useState(false);
+    const [roles, setRoles] = useState<Role[]>([]);
     
     const isModelOpen = isOpen && model === 'members';
     const { server } = data as { server: ServerWithMembersWithProfile };
+
+    useEffect(() => {
+        if (isModelOpen && server?.id) {
+            fetchRoles();
+        }
+    }, [isModelOpen, server?.id]);
+
+    const fetchRoles = async () => {
+        try {
+            const response = await axios.get(`/api/servers/${server?.id}/roles`);
+            setRoles(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const onKick = async (memberId: string) => {
         try {
             setLoadingId(memberId);
@@ -93,14 +110,35 @@ const MembersModel = () => {
         }
     };
 
+    const onAssignRole = async (memberId: string, roleId: string, hasRole: boolean) => {
+        try {
+            setLoadingId(memberId);
+            const url = `/api/servers/${server?.id}/members/${memberId}/roles`;
+            
+            let response;
+            if (hasRole) {
+                response = await axios.delete(url, { data: { roleId } });
+            } else {
+                response = await axios.post(url, { roleId });
+            }
+            
+            router.refresh();
+            onOpen('members', { server: response.data });
+        } catch (error) {
+            console.error("Error assigning role:", error);
+        } finally {
+            setLoadingId("");
+        }
+    }
+
     return (
         <Dialog open={isModelOpen} onOpenChange={onClose}>
-            <DialogContent className="bg-white text-black overflow-hidden max-w-md">
+            <DialogContent className="overflow-hidden max-w-md">
                 <DialogHeader className="pt-6 px-6">
                    <DialogTitle className="text-xl text-center font-bold">
                        Manage Members
                    </DialogTitle>
-                   <DialogDescription className="text-center text-zinc-500">
+                   <DialogDescription className="text-center text-muted-foreground">
                     {server?.members?.length} Members
                    </DialogDescription>
                 </DialogHeader>
@@ -113,15 +151,15 @@ const MembersModel = () => {
                                     {member.profile.name}
                                     {roleIconMap[member.role]}
                                 </div>
-                                <p className="text-xs text-zinc-500">
+                                <p className="text-xs text-muted-foreground">
                                     {member.profile.email}
                                 </p>
                             </div>
-                            {server.profileId !== member.profileId && loadingId !== member.id && (
+                            {loadingId !== member.id && (
                                 <div className="ml-auto">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger>
-                                            <MoreVertical className="h-5 w-5 text-zinc-500"/>
+                                            <MoreVertical className="h-5 w-5 text-muted-foreground"/>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent side="left">
                                             <DropdownMenuSub>
@@ -135,45 +173,94 @@ const MembersModel = () => {
                                                 </DropdownMenuSubTrigger>
                                                 <DropdownMenuPortal>
                                                     <DropdownMenuSubContent>
-                                                        <DropdownMenuItem 
-                                                        onClick={() => onRoleChange(member.id, "GUEST")}
-                                                        >
-                                                            <Shield className="h-4 w-4 mr-2" />
-                                                            Guest
-                                                            {member.role === "GUEST" && (
-                                                                <Check 
-                                                                    className="ml-auto h-4 w-4"
-                                                                />
-                                                            )}
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem
-                                                        onClick={() => onRoleChange(member.id, "MODERATOR")}
-                                                        >
-                                                            <Settings className="h-4 w-4 mr-2" />
-                                                            Moderator
-                                                            {member.role === "MODERATOR" && (
-                                                                <Check 
-                                                                    className="ml-auto h-4 w-4"
-                                                                />
-                                                            )}
-                                                        </DropdownMenuItem>
+                                                        {server.profileId !== member.profileId && (
+                                                            <>
+                                                                <DropdownMenuItem 
+                                                                onClick={() => onRoleChange(member.id, "GUEST")}
+                                                                >
+                                                                    <Shield className="h-4 w-4 mr-2" />
+                                                                    Guest
+                                                                    {member.role === "GUEST" && (
+                                                                        <Check 
+                                                                            className="ml-auto h-4 w-4"
+                                                                        />
+                                                                    )}
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                onClick={() => onRoleChange(member.id, "MODERATOR")}
+                                                                >
+                                                                    <Settings className="h-4 w-4 mr-2" />
+                                                                    Moderator
+                                                                    {member.role === "MODERATOR" && (
+                                                                        <Check 
+                                                                            className="ml-auto h-4 w-4"
+                                                                        />
+                                                                    )}
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuSeparator />
+                                                            </>
+                                                        )}
+                                                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                                                            Custom Roles
+                                                        </div>
+                                                        {roles.map((role) => {
+                                                            const hasRole = member.roles?.some((r) => r.id === role.id);
+                                                            return (
+                                                                <DropdownMenuItem
+                                                                    key={role.id}
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        onAssignRole(member.id, role.id, hasRole);
+                                                                    }}
+                                                                >
+                                                                    <div 
+                                                                        className="w-3 h-3 rounded-full mr-2"
+                                                                        style={{ 
+                                                                            background: role.color,
+                                                                            boxShadow: role.isGlow ? `0 0 10px ${role.color}, 0 0 20px ${role.color}` : 'none'
+                                                                        }}
+                                                                    />
+                                                                    <span
+                                                                        style={{
+                                                                            ...(role.isGradient ? {
+                                                                                backgroundImage: `linear-gradient(to right, ${role.color}, #ff00cc)`,
+                                                                                WebkitBackgroundClip: "text",
+                                                                                WebkitTextFillColor: "transparent"
+                                                                            } : { color: role.color }),
+                                                                            ...(role.isGlow ? {
+                                                                                textShadow: `0 0 10px ${role.color}, 0 0 20px ${role.color}`
+                                                                            } : {})
+                                                                        }}
+                                                                    >
+                                                                        {role.name}
+                                                                    </span>
+                                                                    {hasRole && (
+                                                                        <Check className="ml-auto h-4 w-4" />
+                                                                    )}
+                                                                </DropdownMenuItem>
+                                                            );
+                                                        })}
                                                     </DropdownMenuSubContent>
                                                 </DropdownMenuPortal>
                                             </DropdownMenuSub>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem
-                                            onClick={() => onKick(member.id)}
-                                            >
-                                                <Gavel className="h-4 w-4 mr-2" />
-                                                Kick
-                                            </DropdownMenuItem>
+                                            {server.profileId !== member.profileId && (
+                                                <>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                    onClick={() => onKick(member.id)}
+                                                    >
+                                                        <Gavel className="h-4 w-4 mr-2" />
+                                                        Kick
+                                                    </DropdownMenuItem>
+                                                </>
+                                            )}
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>
                             )}
                             {loadingId === member.id && (
                                 <Loader2
-                                    className="animate-spin text-zinc-500 ml-auto w-4 h-4"
+                                    className="animate-spin text-muted-foreground ml-auto w-4 h-4"
                                 />
                             )}
                         </div>

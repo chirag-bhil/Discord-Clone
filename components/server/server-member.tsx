@@ -1,13 +1,13 @@
 "use client";
 
-import { Member, MemberRole, Profile, Server } from "@/lib/generated/prisma/wasm";
+import { Member, MemberRole, Profile, Server, Role } from "@/lib/generated/prisma";
 import { cn } from "@/lib/utils";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { UserAvtar } from "../user-avtar";
 
 interface ServerMemberProps {
-    member: Member & { profile: Profile };
+    member: Member & { profile: Profile; roles?: Role[] };
     server?: Server;
 }
 
@@ -25,6 +25,8 @@ export const ServerMember = ({
     const router = useRouter();
 
     const icon = roleIconMap[member.role];
+    const role = member.roles?.find((r) => r.isGradient || r.isGlow) || member.roles?.[0];
+
     const onClick = () => {
         router.push(`/servers/${params?.serverId}/conversations/${member.id}`);
     }
@@ -45,6 +47,16 @@ export const ServerMember = ({
                     "font-semibold text-sm text-zinc-500 group-hover:text-zinc-600 dark:text-zinc-400 dark:group-hover:text-zinc-300 transition",
                     params?.memberId === member.id && "text-primary dark:text-zinc-200 dark:group-hover:text-white"
                 )}
+                style={{
+                    ...(role?.isGradient ? {
+                        backgroundImage: `linear-gradient(to right, ${role.color}, #ff00cc)`,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent"
+                    } : { color: role?.color }),
+                    ...(role?.isGlow ? {
+                        textShadow: `0 0 10px ${role.color}, 0 0 20px ${role.color}`
+                    } : {})
+                }}
             >
                 {member.profile.name}
             </p>

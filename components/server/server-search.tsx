@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchIcon } from "lucide-react";
-import React, { useInsertionEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CommandDialog, CommandInput, CommandList, CommandItem, CommandEmpty } from "../ui/command";
 import { CommandGroup } from "cmdk";
 import { useRouter, useParams } from "next/navigation";
@@ -23,7 +23,7 @@ export const ServerSearch = ({ data }: ServerSearchProps) => {
     const [open, setOpen] = useState(false);
     const router  = useRouter();
     const params = useParams();
-    useInsertionEffect(() => {
+    useEffect(() => {
         const down = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey))
                 {

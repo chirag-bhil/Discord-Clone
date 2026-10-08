@@ -1,6 +1,7 @@
 import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
-import { ChannelType, MemberRole } from "@/lib/generated/prisma";
+import { Channel, ChannelType, MemberRole } from "@/lib/generated/prisma";
+import { ServerWithMembersWithProfile } from "@/types";
 import { channel } from "diagnostics_channel";
 import { redirect } from "next/navigation";
 import { ServerHeader } from "./server-header";
@@ -39,7 +40,7 @@ export const ServerSidebar = async ({
         return redirect("/sign-in");
     }
 
-    const server = await db.server.findUnique({
+    const serverRaw = await db.server.findUnique({
         where: {
             id: serverId,
         },
@@ -52,6 +53,7 @@ export const ServerSidebar = async ({
             members: {
                 include: {
                     profile: true,
+                    memberRoles: { include: { role: true } },
                 },
                 orderBy: {
                     role: "asc",
@@ -59,6 +61,16 @@ export const ServerSidebar = async ({
             }
         }
     });
+
+    // MongoDB uses an explicit MemberRoleLink join; reshape members to the
+    // frontend `member.roles: Role[]` contract used by header/section/member components.
+    const server: (ServerWithMembersWithProfile & { channels: Channel[] }) | null = serverRaw && {
+        ...serverRaw,
+        members: serverRaw.members.map((memberRaw) => {
+            const { memberRoles, ...rest } = memberRaw;
+            return { ...rest, roles: memberRoles.map((mr) => mr.role) };
+        }),
+    };
 
     const textChannels = server?.channels.filter((channel) => channel.type === ChannelType.TEXT);
     const audioChannels = server?.channels.filter((channel) => channel.type === ChannelType.AUDIO);

@@ -104,7 +104,7 @@ const CreateChannelModel = () => {
 
     return (
         <Dialog open={isModelOpen} onOpenChange={handleClose}>
-            <DialogContent className="bg-white text-black p-0 overflow-hidden max-w-sm">
+            <DialogContent className="p-0 overflow-hidden max-w-sm">
                 <DialogHeader className="pt-6 px-6">
                     <DialogTitle className="text-xl text-center font-bold">
                         Create Your Channel
@@ -118,13 +118,13 @@ const CreateChannelModel = () => {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary-700">
+                                        <FormLabel className="uppercase text-xs font-bold text-muted-foreground">
                                             Channel Name
                                         </FormLabel>
                                         <FormControl>
                                             <Input 
                                                 disabled={isLoading}
-                                                className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                                                className="bg-muted/60 border-0 focus-visible:ring-0 text-foreground focus-visible:ring-offset-0"
                                                 placeholder="Enter channel name"
                                                 {...field}
                                             />
@@ -146,7 +146,7 @@ const CreateChannelModel = () => {
                                         >
                                             <FormControl>
                                                 <SelectTrigger
-                                                    className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none"
+                                                    className="bg-muted/60 border-0 focus:ring-0 text-foreground ring-offset-0 focus:ring-offset-0 capitalize outline-none"
                                                 >
                                                     <SelectValue 
                                                         placeholder="Select channel type"
@@ -170,7 +170,7 @@ const CreateChannelModel = () => {
                                 )}
                             />
                         </div>
-                        <DialogFooter className="bg-gray-100 px-6 py-4">
+                        <DialogFooter className="bg-muted px-6 py-4">
                             <Button variant="primary" disabled={isLoading}>
                                 Create
                             </Button>

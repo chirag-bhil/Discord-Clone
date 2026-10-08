@@ -1,21 +1,23 @@
 import { redirect } from "next/navigation";
 import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
-import { get } from "http";
 import { getOrCreateConversation } from "@/lib/conversation";
 import { ChatHeader } from "@/components/chat/chat-header";
+import { ChatInput } from "@/components/chat/chat-input";
+import { ChatMessages } from "@/components/chat/chat-messages";
 
 interface MemberIdPageProps {
-    params: {
+    params: Promise<{
         serverId: string;
         memberId: string;
-    }
+    }>
 }
 
 const MemberIdPage = async ({
     params
 }: MemberIdPageProps
 ) => {
+    const { serverId, memberId } = await params;
     const profile = await currentProfile();
 
     if (!profile) {
@@ -24,7 +26,7 @@ const MemberIdPage = async ({
 
     const currentMember = await db.member.findFirst({
         where: {
-            serverId: params.serverId,
+            serverId,
             profileId: profile.id,
         },
         include: {
@@ -37,22 +39,54 @@ const MemberIdPage = async ({
         return redirect("/");
     }
 
-    const conversation = await getOrCreateConversation(currentMember.id, params.memberId);
+    const otherMember = await db.member.findFirst({
+        where: {
+            id: memberId,
+            serverId,
+        },
+        include: {
+            profile: true,
+        },
+    });
+
+    if (!otherMember || otherMember.id === currentMember.id) {
+        return redirect(`/servers/${serverId}`);
+    }
+
+    const conversation = await getOrCreateConversation(currentMember.id, otherMember.id);
 
     if (!conversation) {
-        return redirect(`/servers/${params.serverId}`);
+        return redirect(`/servers/${serverId}`);
     }
 
     const { memberOne, memberTwo } = conversation;
-    const otherMember = memberOne.profileId === profile.id ? memberTwo : memberOne;
+    const conversationMember = memberOne.profileId === profile.id ? memberTwo : memberOne;
 
     return (  
-        <div className="bg-white dark:bg-[#313338] flex flex-col h-full">
+        <div className="flex h-full flex-col bg-background">
             <ChatHeader 
-                imageUrl={otherMember.profile.imageUrl}
-                name={otherMember.profile.name}
-                serverId={params.serverId}
+                imageUrl={conversationMember.profile.imageUrl}
+                name={conversationMember.profile.name}
+                serverId={serverId}
                 type="conversation"
+            />
+            <ChatMessages
+                member={currentMember}
+                name={conversationMember.profile.name}
+                imageUrl={conversationMember.profile.imageUrl}
+                chatId={conversation.id}
+                type="conversation"
+                apiUrl="/api/direct-messages"
+                socketUrl="/api/socket/direct-messages"
+                socketQuery={{ conversationId: conversation.id }}
+                paramKey="conversationId"
+                paramValue={conversation.id}
+            />
+            <ChatInput
+                name={conversationMember.profile.name}
+                type="conversation"
+                apiUrl="/api/socket/direct-messages"
+                query={{ conversationId: conversation.id }}
             />
         </div>
     );
